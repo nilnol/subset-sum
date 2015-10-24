@@ -17,8 +17,8 @@ def subset_sum_search(xs, n):
         y = 1
         while y < x:
             z = (x + y) >> 1
-            t = []
             for m in [n + x, n + y, n + z]:
+                t = []
                 while m > 0:
                     i = int(math.floor(math.log(m)/math.log(2)))
                     m -= 2**i
@@ -76,7 +76,7 @@ for i in tests_to_run:
     r = subset_sum_search(a, b)
     print(r, len(r), sum(r), b)
 
-"""
+
 # Additionally, check every subset of a set.
 S = [2,3,5,7,17,19,23,41]
 def a(xs, i):
@@ -92,4 +92,4 @@ def a(xs, i):
 for i in range(1, 2**len(S)):
     X = subset_sum_search(S, sum(a(S, i)))
     print(sum(a(S, i)), X)
-"""
+
