@@ -12,14 +12,13 @@ def subset_sum_search(xs, n):
     if n > sum(filter(lambda x: x >= 0, xs)):
         return []
     for k in range(0, len(xs) + 1):
-#        x = (1 << (k)) - (1 << int(k/2))
         a = ((1 << (k)) - 1) ^ ((1 << int(k/2)) - 1)
         b = ((1 << (k))) | ((1 << int(k/2)) - 1)
         for x in [a, b]:
             y = 0
             while y < x:
                 z = (x + y) >> 1
-                for m in [x, y, z, n + x, n + y, n + z]:
+                for m in [z - 1, z]:
                     t = []
                     while m > 0:
                         i = int(math.floor(math.log(m)/math.log(2)))
