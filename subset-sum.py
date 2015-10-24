@@ -20,16 +20,16 @@ def subset_sum_search(xs, n):
         while y < x:
             z = (x + y) >> 1
             t = []
-            m = n + z
-            while m > 0:
-                i = int(math.floor(math.log(m)/math.log(2)))
-                m -= 2**i
-                if i < len(xs):
-                    t.append(xs[i])
-                    if sum(t) > n:
-                        t.pop()
-                if sum(t) == n:
-                    return t
+            for m in [n + x, n + y, n + z]:
+                while m > 0:
+                    i = int(math.floor(math.log(m)/math.log(2)))
+                    m -= 2**i
+                    if i < len(xs):
+                        t.append(xs[i])
+                        if sum(t) > n:
+                            t.pop()
+                    if sum(t) == n:
+                        return t
             if sum(t) < n:
                 y = z + 1
             else:
