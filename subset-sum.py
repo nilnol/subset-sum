@@ -73,7 +73,7 @@ i = list(i)
 i.sort()
 tests[1] = (l, sum([l[x] for x in i]))
 
-tests_to_run = []
+tests_to_run = [1]
 
 for i in tests_to_run:
 #    print("i =", i)
@@ -83,7 +83,7 @@ for i in tests_to_run:
     print(r, len(r), sum(r), b)
 #    print()
 #    print(i, r)
-
+"""
 # Additionally, check every subset of a set.
 S = [2,3,5,7,17,19,23,41]
 def a(xs, i):
@@ -99,4 +99,4 @@ def a(xs, i):
 for i in range(1, 2**len(S)):
     X = subset_sum_search(S, sum(a(S, i)))
     print(sum(a(S, i)), X)
-
+"""
