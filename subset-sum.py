@@ -1,9 +1,7 @@
-import sys
-sys.setrecursionlimit(2**16)
-
 from bisect import bisect
 
 import math
+import random
 
 # Implements the search version of subset sum.
 # The subset sum problem: given a set and a number find a subset of the set which sums to the given number.
@@ -40,7 +38,6 @@ def subset_sum_search(xs, n):
 def subset_sum(xs, n):
     return sum(subset_sum_search(xs, n)) == n
 
-import math
 # Optimization version, using the decision version.
 # Source for optimization version algorithm:
 # https://courses.cs.washington.edu/courses/csep521/05sp/lectures/sss.pdf
@@ -57,8 +54,7 @@ def subset_sum_optim(xs, n):
 # Testing, testing...
 tests = {}
 
-import random
-
+# Random problem instances.
 l = []
 for _ in range(100):
 	l += [random.choice(range(1, 8193))]
@@ -76,13 +72,10 @@ tests[1] = (l, sum([l[x] for x in i]))
 tests_to_run = [1]
 
 for i in tests_to_run:
-#    print("i =", i)
     a, b = tests[i]
     r = subset_sum_search(a, b)
-#    r = subset_sum(a, b)
     print(r, len(r), sum(r), b)
-#    print()
-#    print(i, r)
+
 """
 # Additionally, check every subset of a set.
 S = [2,3,5,7,17,19,23,41]
