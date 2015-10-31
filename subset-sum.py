@@ -3,41 +3,62 @@ from bisect import bisect
 import math
 import random
 
-# Implements the search version of subset sum.
+# Implements the decision version of subset sum.
 # The subset sum problem: given a set and a number find a subset of the set which sums to the given number.
 # Inputs: an ordered list of integers xs, and an integer n which is the target sum.
-def subset_sum_search(xs, n):
-    if n < sum(filter(lambda x: x < 0, xs)):
-        return []
-    if n > sum(filter(lambda x: x >= 0, xs)):
-        return []
-    for k in range(0, len(xs) + 1):
-        a = ((1 << (k)) - 1) ^ ((1 << int(k/2)) - 1)
-        b = ((1 << ((k >> 1) << 1))) | ((1 << int(k/2)) - 1)
-        for x in [a, b]:
-            y = 0
-            while y < x:
-                z = (x + y) >> 1
-                for m in [z - 1, z]:
-                    t = []
-                    while m > 0:
-                        i = int(math.floor(math.log(m)/math.log(2)))
-                        m -= 1 << i
-                        if i < len(xs):
-                            t.append(xs[i])
-                            if sum(t) > n:
-                                t.pop()
-                    if sum(t) == n:
-                        return t
-                if sum(t) < n:
-                    y = z + 1
-                else:
-                    x = z
-    return []
-
-# Decision version, using the search version.    
 def subset_sum(xs, n):
-    return sum(subset_sum_search(xs, n)) == n
+    def subset_sum_rec(xs, n, which):
+        s = list(filter(lambda x: x <= n, xs))
+        if len(s) == 0:
+            return False
+        def minimum(xs, n, i):
+            ts = []
+            x = xs[i]
+            while n - x >= 0:
+                ts.append(x)
+                n -= x
+                i = bisect(xs, n, 0, i) - 1
+                if i < 0:
+                    break
+                x = xs[i]
+            return ts
+        minima = []
+        for i in range(len(xs)):
+            minima.append((i, minimum(xs, n, i)))
+        if 0 in [n - sum(m) for (i, m) in minima]:
+            return True
+        if which:
+            if subset_sum_rec(xs[:-1], n - xs[-1], which):
+                return True
+        else:
+            minima.sort()
+            i, m = minima[0]
+            xs = xs[:]
+            for x in m:
+                xs.remove(x)
+            if subset_sum_rec(xs, n - sum(m), which):
+                return True
+        return False
+    return subset_sum_rec(xs, n, True) or subset_sum_rec(xs, n, False)
+
+# Search version, using the decision version.
+def subset_sum_search(xs, n):
+    if subset_sum(xs, n):
+        xs = xs[:]
+        r = []
+        m = n
+        while len(xs) > 0:
+            x = xs.pop()
+            if not subset_sum(xs, m):
+                m -= x
+                r.append(x)
+                if sum(r) == n:
+                    break
+                if sum(r) > n:
+                    r.pop()
+                    break
+        return r
+    return []
 
 # Optimization version, using the decision version.
 # Source for optimization version algorithm:
@@ -79,9 +100,27 @@ tests[8] = ([10379150, 43258760, 69027197, 217282553, 220851198, 325227631, 4248
 tests[9] = ([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37], 36, [0, 1, 2])
 tests[10] = ([40101858, 76322755, 136159283, 199307000, 236806451, 257503966, 378814688, 383257677, 452055324, 542791427, 562331475, 617971320, 638557181, 656754240, 702696128, 777063735, 802892554, 912963912, 915430670, 973647658, 1070795584, 1117969828, 1155206382, 1156767057, 1180975063, 1232044790, 1314374206, 1409329005, 1411407234, 1455313086, 1463876477, 1526335168, 1528588894, 1609964402, 1628016485, 1714392503, 1727417767, 1754979404, 1818412096, 1905552710, 1939472553, 2028752538, 2110815980, 2115652496, 2119964746, 2124490852, 2134336748, 2161208058, 2164795184, 2333102864, 2351325317, 2354598172, 2372550310, 2476975047, 2492125088, 2524822753, 2565233554, 2586038210, 2649293494, 2660074193, 2663665003, 2715274977, 2844690230, 2877483690, 2910856563, 2988563655, 3024241538, 3079918753, 3094523023, 3120329400, 3132845030, 3134747920, 3169341355, 3182099989, 3261204927, 3274641117, 3334842750, 3352770217, 3410678702, 3500147856, 3543880373, 3548280943, 3550260305, 3554893043, 3726448240, 3752332634, 3769464662, 3775973858, 3884338877, 3903915987, 3935095948, 3945429985, 3973252645, 4080309119, 4115991971, 4147147299, 4173134257, 4182881211, 4242111357, 4267824074], 6257963279, [42, 95])
 tests[11] = ([48906186, 66024487, 95604669, 100998714, 158291358, 168721094, 270502893, 412017392, 447279918, 482366253, 535901678, 564962570, 634308664, 691107936, 822368619, 872499243, 875706733, 951988851, 981474962, 1026401771, 1039488404, 1047898977, 1081434249, 1123450125, 1145897065, 1194611615, 1205236320, 1243510849, 1277796220, 1424260241, 1605294823, 1636483491, 1688607068, 1702581806, 1723973540, 1736928390, 1776373463, 1781289297, 1794191832, 1836507577, 1879976024, 1907761658, 1918020774, 1920393554, 1985815147, 2020899727, 2078837627, 2100655729, 2104132739, 2178385315, 2207407770, 2230214517, 2236874802, 2376607851, 2445534196, 2523179648, 2553547084, 2604817872, 2605322833, 2639480049, 2660642014, 2750258146, 2776615832, 2801875866, 2808696612, 2836018582, 2898005714, 2920493054, 3005605964, 3027876104, 3297475865, 3306473175, 3309225458, 3323966671, 3333127002, 3439798909, 3444443694, 3461037127, 3478273983, 3483118233, 3509723718, 3543469813, 3548829506, 3635866226, 3713650379, 3718215082, 3730128877, 3742194853, 3753471760, 3781551343, 3901011813, 3931836558, 3933810677, 4025493027, 4150543218, 4170723959, 4188972557, 4190335278, 4239050321, 4272960608], 2225673005, [11, 12, 19])
+tests[12] = ([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37], 32, [5, 7])
+tests[13] = ([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37], 100, [])
+tests[14] = ([2, 3, 5, 7, 11, 13], 40, [])
+tests[15] = ([2, 3, 5, 7, 11, 13], 21, [])
+tests[16] = ([2, 3, 5, 7, 11, 13], 34, [])
+tests[17] = ([2, 3, 5, 7, 11, 13], 23, [])
+tests[18] = ([2, 3, 5, 7, 11, 13], 25, [])
+tests[19] = ([2, 3, 5, 7, 11, 13], 37, [])
+tests[20] = ([2, 3, 5, 7, 11, 13], 38, [])
+tests[21] = ([2, 3, 5, 7, 11, 13], 35, [])
+tests[22] = ([1, 2, 3, 4, 5, 6], 15, [0, 1, 2, 3, 4])
+tests[23] = ([2,3,5,7,17,19,23,41], 37, [0,2,3,6])
+tests[24] = ([2,3,5,7,17,19,23,41], 39, [])
+tests[25] = ([2,3,5,7,17,19,23,41], 45, [])
 
 tests_to_run = [2, 3, 4, 5, 6, 7, 8, 9, 10]
-tests_to_run += [11]
+#tests_to_run = [9, 12, 13, 14, 15, 16, 17, 18]
+#tests_to_run = [14, 15, 16, 19, 20, 21]
+#tests_to_run = [20]
+tests_to_run += [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 6]
+#tests_to_run = [23]
 
 """
 problems = 0
@@ -101,11 +140,14 @@ while True:
 
 for i in tests_to_run:
     a, b, c = tests[i]
-    r = subset_sum_search(a, b)
-    print(r, len(r), sum(r), b)
-    if sum(r) != b:
-        print(a, b, c, [a[i] for i in c])
-"""
+#    r = subset_sum_search(a, b)
+#    print(r, len(r), sum(r), b)
+#    if r != [] and sum(r) != b:
+#        print(a, b, c, [a[i] for i in c])
+#    print("n", b)
+    print(i, subset_sum(a, b))
+
+
 # Additionally, check every subset of a set.
 S = [2,3,5,7,17,19,23,41]
 def a(xs, i):
@@ -120,5 +162,6 @@ def a(xs, i):
 
 for i in range(1, 2**len(S)):
     X = subset_sum_search(S, sum(a(S, i)))
-    print(X, len(X), sum(X), sum(a(S, i)))
-"""
+    if sum(X) != sum(a(S, i)):
+        print(X, len(X), sum(X), sum(a(S, i)))
+
