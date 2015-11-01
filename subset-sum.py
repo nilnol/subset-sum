@@ -7,10 +7,15 @@ import random
 # The subset sum problem: given a set and a number find a subset of the set which sums to the given number.
 # Inputs: an ordered list of integers xs, and an integer n which is the target sum.
 def subset_sum(xs, n):
-    def subset_sum_rec(xs, n, which):
+    def subset_sum_rec(xs, ns, which):
+        n, n0 = ns
         s = list(filter(lambda x: x <= n, xs))
         if len(s) == 0:
             return False
+        if n in s:
+            return True
+        if sum(s) == n:
+            return True
         def minimum(xs, n, i):
             ts = []
             x = xs[i]
@@ -23,23 +28,28 @@ def subset_sum(xs, n):
                 x = xs[i]
             return ts
         minima = []
-        for i in range(len(xs)):
-            minima.append((i, minimum(xs, n, i)))
-        if 0 in [n - sum(m) for (i, m) in minima]:
-            return True
-        if which:
-            if subset_sum_rec(xs[:-1], n - xs[-1], which):
-                return True
-        else:
-            minima.sort()
-            i, m = minima[0]
-            xs = xs[:]
-            for x in m:
-                xs.remove(x)
-            if subset_sum_rec(xs, n - sum(m), which):
-                return True
+        for ns in [ns, reversed(ns)]:
+            for n in ns:
+                for i in range(len(xs)):
+                    minima.append((i, minimum(xs, n, i)))
+                ds = [n - sum(m) for (i, m) in minima]
+                if 0 in ds:
+                    return True
+            if which:
+                if subset_sum_rec(xs[:-1], [n - xs[-1], n], which):
+                    return True
+            else:
+                ms = [x for (_, x) in minima if sum(x) != 0]
+                ms.sort(key=lambda x: sum(x))
+                m = ms[0]
+                ts = xs[:]
+                for x in m:
+                    ts.remove(x)
+                m = m[:1]
+                if subset_sum_rec(ts, [n - sum(m), n], which):
+                    return True
         return False
-    return subset_sum_rec(xs, n, True) or subset_sum_rec(xs, n, False)
+    return subset_sum_rec(xs, [n, n], True) or subset_sum_rec(xs, [n, n], False)
 
 # Search version, using the decision version.
 def subset_sum_search(xs, n):
@@ -114,14 +124,15 @@ tests[22] = ([1, 2, 3, 4, 5, 6], 15, [0, 1, 2, 3, 4])
 tests[23] = ([2,3,5,7,17,19,23,41], 37, [0,2,3,6])
 tests[24] = ([2,3,5,7,17,19,23,41], 39, [])
 tests[25] = ([2,3,5,7,17,19,23,41], 45, [])
+tests[26] = ([32824321, 232228894, 313529596, 337243275, 345002652, 508635306, 526206869, 535860848, 561813837, 575885766, 691872100, 692900639, 742587643, 774411266, 781591881, 797410010, 822097146, 843029096, 950279292, 951844589, 980103859, 1009000736, 1071951092, 1087455133, 1273945952, 1284960006, 1297330075, 1334683958, 1348475188, 1353766826, 1362156940, 1454138714, 1466430019, 1537213589, 1548911313, 1681694992, 1696010711, 1699471991, 1745645219, 1745981255, 1809977183, 1843211537, 1941856525, 1942998955, 1952411795, 1978758238, 2035551695, 2080603797, 2125246240, 2137083892, 2164489791, 2195692780, 2218754996, 2232693470, 2506322852, 2534580849, 2544821681, 2558942275, 2568411247, 2597518020, 2604407433, 2665395771, 2691535965, 2702251465, 2754815638, 2767000823, 2767765518, 2781562311, 2796768408, 2798456908, 2807657247, 2810277864, 2934921674, 3014782608, 3082627468, 3137182170, 3185202851, 3217513361, 3350522492, 3424529023, 3449942172, 3515377297, 3563979878, 3579592646, 3638569179, 3746195129, 3761013390, 3808186532, 3887547609, 4011601107, 4041896785, 4051739376, 4071322746, 4088701551, 4105689956, 4111937669, 4126371098, 4166165815, 4180103240, 4201664658], 7018413836, [34, 55, 72])
 
 tests_to_run = [2, 3, 4, 5, 6, 7, 8, 9, 10]
 #tests_to_run = [9, 12, 13, 14, 15, 16, 17, 18]
 #tests_to_run = [14, 15, 16, 19, 20, 21]
 #tests_to_run = [20]
-tests_to_run += [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 6]
+tests_to_run += [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
 #tests_to_run = [23]
-
+#tests_to_run = []
 """
 problems = 0
 failed = 0
@@ -133,11 +144,10 @@ while True:
 #        print(a, b, c, [a[i] for i in c])
 #        break
         failed += 1
-        print(c, failed, problems)
+        print(a, b, c)
     if problems % 100 == 0:
         print(failed, problems)
 """
-
 for i in tests_to_run:
     a, b, c = tests[i]
 #    r = subset_sum_search(a, b)
@@ -150,6 +160,7 @@ for i in tests_to_run:
 
 # Additionally, check every subset of a set.
 S = [2,3,5,7,17,19,23,41]
+S, _, _ = tests[26]
 def a(xs, i):
     xs = xs[:]
     rs = []
