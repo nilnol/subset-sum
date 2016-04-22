@@ -6,25 +6,19 @@ import random
 # The subset sum problem: given a set and a number find a subset of the set which sums to the given number.
 # Inputs: an ordered list of integers xs, and an integer n which is the target sum.
 def subset_sum(xs, n):
-    def subset_sum_rec(xs, k, n, t):
-        if not n in t:
-            t[n] = False
+    r = set([(n, len(xs))])
+    while len(r) > 0:
+        n, k = r.pop()
         if n in xs[:k]:
-            t[n] = True
+            return True
         m = 0
         for i in range(k):
-            if t[n]:
-                break
             m += xs[i]
             if m == n:
-                t[n] = True
-                break
+                return True
             if m > n:
-                if sum(xs[:i]) >= m - n and subset_sum_rec(xs, i, m - n, t):
-                    t[n] = True
-                    break
-        return t[n]
-    return subset_sum_rec(xs, len(xs), n, {})
+                r.add((m - n, i))
+    return False
 
 
 # Search version, using the decision version.
