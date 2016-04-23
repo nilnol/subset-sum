@@ -1,3 +1,5 @@
+from bisect import bisect
+
 import math
 import random
 
@@ -9,7 +11,8 @@ def subset_sum(xs, n):
     r = [(n, len(xs))]
     while len(r) > 0:
         n, k = r.pop(0)
-        if n in xs[:k]:
+        j = bisect(xs, n, 0, k)
+        if j < k and j > 0 and xs[j - 1] == n:
             return True
         m = 0
         for i in range(k):
@@ -41,9 +44,9 @@ def subset_sum_search(xs, n):
 def subset_sum_optim(xs, n):
     t = xs[:]
     for i in range(math.floor(math.log(n)/math.log(2)), -1, -1):
-        t.append(2**i)
+        t.insert(bisect(t, 2**i), 2**i)
     for i in range(math.floor(math.log(n)/math.log(2)), -1, -1):
-        t.remove(2**i)
+        t.pop(bisect(t, 2**i) - 1)
         if not subset_sum(t, n):
             n -= 2**i
     return n
