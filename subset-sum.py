@@ -10,17 +10,17 @@ import random
 def subset_sum(xs, n):
     r = [(n, len(xs))]
     while len(r) > 0:
-        n, k = r.pop(0)
-        j = bisect(xs, n, 0, k)
-        if j < k and j > 0 and xs[j - 1] == n:
+        n, i = r.pop(0)
+        if n in xs[:i]:
             return True
-        m = 0
-        for i in range(k):
-            m += xs[i]
-            if m == n:
+        m = sum(xs[:i]) - n
+        if m == 0:
+            return True
+        for j, z in enumerate(xs[:i]):
+            if m - z == 0:
                 return True
-            if m > n:
-                r.append((m - n, i))
+            if m - z >= xs[0]:
+                r.append((m - z, j))
     return False
 
 
